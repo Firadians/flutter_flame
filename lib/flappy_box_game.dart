@@ -84,32 +84,38 @@ class FlappyBoxGame extends FlameGame with TapDetector, HasCollisionDetection {
     final topPipeHeight = Random().nextDouble() * (size.y - pipeGap - 100) + 50;
 
     // Top pipe
-    add(Pipe(this, Vector2(size.x, topPipeHeight),
-        isTop: true, width: pipeWidth));
+    add(Pipe(this, Vector2(pipeWidth, topPipeHeight), isTop: true));
 
     // Bottom pipe
     final bottomPipeY = topPipeHeight + pipeGap;
     final bottomPipeHeight = size.y - bottomPipeY;
-    add(Pipe(this, Vector2(size.x, bottomPipeHeight),
-        isTop: false, width: pipeWidth, yPos: bottomPipeY));
+    add(Pipe(this, Vector2(pipeWidth, bottomPipeHeight),
+        isTop: false, yPos: bottomPipeY));
   }
 
   void gameOver() {
     if (!isGameOver) {
-      // Ensure it only triggers once
       isGameOver = true;
-      overlays.add('GameOver'); // Add the overlay first
+      overlays.add('GameOver'); // Show overlay
       Future.delayed(const Duration(milliseconds: 50), () {
         pauseEngine(); // Pause engine after adding overlay
       });
     }
   }
 
+  void restartGame() {
+    isGameOver = false;
+    children.whereType<Pipe>().forEach((pipe) => pipe.removeFromParent());
+    player.reset();
+    overlays.remove('GameOver'); // Remove the GameOver overlay
+    resumeEngine(); // Resume the game
+  }
+
   void reset() {
     isGameOver = false;
     player.reset();
     children.whereType<Pipe>().forEach((pipe) => pipe.removeFromParent());
-    overlays.remove('GameOver'); // Remove the overlay when retrying
+    overlays.remove('GameOver'); // Remove overlay when retrying
     resumeEngine();
   }
 }
@@ -132,7 +138,7 @@ class Player extends RectangleComponent with CollisionCallbacks {
     super.update(dt);
 
     // Apply gravity to the player
-    velocityY += 800 * dt;
+    velocityY += gameRef.gravity * dt; // Use gameRef.gravity for consistency
     position.y += velocityY * dt;
 
     // Check if player goes off the screen
@@ -164,8 +170,8 @@ class Pipe extends PositionComponent with CollisionCallbacks {
   final bool isTop;
   final double width;
 
-  Pipe(this.gameRef, Vector2 size,
-      {required this.isTop, required this.width, double yPos = 0}) {
+  Pipe(this.gameRef, Vector2 size, {required this.isTop, double yPos = 0})
+      : width = size.x {
     this.size = Vector2(width, size.y);
     position = Vector2(gameRef.size.x, yPos);
     anchor = isTop ? Anchor.bottomCenter : Anchor.topCenter;
