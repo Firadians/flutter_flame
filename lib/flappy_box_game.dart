@@ -40,6 +40,8 @@ class FlappyBoxGame extends FlameGame with TapDetector, HasCollisionDetection {
   final double gravity = 800; // Gravity strength
   final double jumpStrength = -300; // Jump force
   bool isGameOver = false;
+  int score = 0; // Add score counter
+  late TextComponent scoreText; // Component to display the score
 
   @override
   Future<void> onLoad() async {
@@ -50,6 +52,20 @@ class FlappyBoxGame extends FlameGame with TapDetector, HasCollisionDetection {
     // Set up pipe spawner timer
     pipeTimer = Timer(2, repeat: true, onTick: spawnPipe);
     pipeTimer.start();
+
+    // Add the score text
+    scoreText = TextComponent(
+      text: 'Score: $score',
+      position: Vector2(size.x / 2, 20),
+      anchor: Anchor.topCenter,
+      textRenderer: TextPaint(
+        style: const TextStyle(
+          fontSize: 24,
+          color: Colors.white,
+        ),
+      ),
+    );
+    add(scoreText);
   }
 
   @override
@@ -57,6 +73,11 @@ class FlappyBoxGame extends FlameGame with TapDetector, HasCollisionDetection {
     super.update(dt);
     if (!isGameOver) {
       pipeTimer.update(dt);
+
+      // Increase the score based on movement or time
+      // Here, every second or specific number of steps can increase the score
+      score += (150 * dt).toInt(); // Add based on steps or movement
+      scoreText.text = 'Score: $score'; // Update the score text
     }
   }
 
@@ -105,6 +126,8 @@ class FlappyBoxGame extends FlameGame with TapDetector, HasCollisionDetection {
 
   void restartGame() {
     isGameOver = false;
+    score = 0; // Reset score on restart
+    scoreText.text = 'Score: $score'; // Reset score text
     children.whereType<Pipe>().forEach((pipe) => pipe.removeFromParent());
     player.reset();
     overlays.remove('GameOver'); // Remove the GameOver overlay
@@ -113,6 +136,8 @@ class FlappyBoxGame extends FlameGame with TapDetector, HasCollisionDetection {
 
   void reset() {
     isGameOver = false;
+    score = 0; // Reset score when retrying
+    scoreText.text = 'Score: $score'; // Reset score text
     player.reset();
     children.whereType<Pipe>().forEach((pipe) => pipe.removeFromParent());
     overlays.remove('GameOver'); // Remove overlay when retrying
