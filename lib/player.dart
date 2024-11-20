@@ -1,23 +1,57 @@
 import 'package:flame/components.dart';
 import 'package:flame/collisions.dart';
-import 'package:flame_game/my_game.dart';
+import 'package:flame_game/flappy_box_game.dart';
 
-class Player extends SpriteComponent with CollisionCallbacks {
+class Player extends SpriteComponent with CollisionCallbacks, HasGameRef {
+  final double jumpStrength;
+  double velocityY = 0; // Gravity effect
+
+  Player({required this.jumpStrength});
+
   @override
-  void onLoad() {
+  Future<void> onLoad() async {
     super.onLoad();
-    // Set up the player (load sprite, size, position, etc.)
-    // Example:
-    // sprite = await Sprite.load('player.png');
-    // size = Vector2(50, 50);
 
-    add(RectangleHitbox()); // Add a hitbox for collision detection
+    // Load the player sprite
+    sprite = await gameRef.loadSprite('player.png');
+
+    // Set size and position of the player
+    size = Vector2(50, 50);
+    position = Vector2(100, gameRef.size.y / 2); // Center vertically
+    anchor = Anchor.center;
+
+    // Add a collision hitbox
+    add(RectangleHitbox());
+  }
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+
+    // Apply gravity
+    velocityY += (gameRef as FlappyBoxGame).gravity * dt;
+    position.y += velocityY * dt;
+
+    // Check for game over if player goes off-screen
+    if (position.y > gameRef.size.y || position.y < 0) {
+      (gameRef as FlappyBoxGame).gameOver();
+    }
+  }
+
+  void jump() {
+    velocityY = jumpStrength; // Apply upward force
+  }
+
+  void reset() {
+    position = Vector2(100, gameRef.size.y / 2); // Reset position
+    velocityY = 0; // Reset velocity
   }
 
   @override
   void onCollision(Set<Vector2> intersectionPoints, PositionComponent other) {
-    // When the player collides with another object, trigger game over
-    final game = other.findGame() as FlappyBoxGame;
-    game.gameOver();
+    if (other is Pipe) {
+      (gameRef as FlappyBoxGame).gameOver();
+    }
+    super.onCollision(intersectionPoints, other);
   }
 }

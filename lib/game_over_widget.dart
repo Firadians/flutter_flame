@@ -13,10 +13,24 @@ class GameOverWidget extends StatelessWidget {
         children: [
           Text(
             'Game Over',
-            style: TextStyle(fontSize: 40, color: Colors.red),
+            style: TextStyle(
+              fontSize: 50,
+              fontWeight: FontWeight.bold,
+              color: Colors.redAccent,
+              shadows: [
+                Shadow(
+                    blurRadius: 10.0,
+                    color: Colors.black,
+                    offset: Offset(3, 3)),
+              ],
+            ),
           ),
           SizedBox(height: 20),
           ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              padding: EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+              textStyle: TextStyle(fontSize: 20),
+            ),
             onPressed: onRestart,
             child: Text('Restart'),
           ),

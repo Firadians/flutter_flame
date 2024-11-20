@@ -65,17 +65,18 @@ class FlappyBoxGame extends FlameGame with TapDetector, HasCollisionDetection {
         ),
       ),
     );
+
     add(scoreText);
   }
 
   @override
   void update(double dt) {
     super.update(dt);
+
     if (!isGameOver) {
       pipeTimer.update(dt);
 
       // Increase the score based on movement or time
-      // Here, every second or specific number of steps can increase the score
       score += (150 * dt).toInt(); // Add based on steps or movement
       scoreText.text = 'Score: $score'; // Update the score text
     }
@@ -147,14 +148,14 @@ class FlappyBoxGame extends FlameGame with TapDetector, HasCollisionDetection {
 
 class Player extends RectangleComponent with CollisionCallbacks {
   final double jumpStrength;
-  final FlappyBoxGame gameRef;
+  final FlappyBoxGame gameRef; // Keep reference to game instance
   double velocityY = 0;
 
   Player(this.gameRef, {required this.jumpStrength}) {
     size = Vector2(40, 40);
     position = Vector2(50, 300); // Starting position
     anchor = Anchor.center;
-    paint = Paint()..color = Colors.blue; // Set the box color
+
     add(RectangleHitbox());
   }
 
@@ -191,7 +192,7 @@ class Player extends RectangleComponent with CollisionCallbacks {
 }
 
 class Pipe extends PositionComponent with CollisionCallbacks {
-  final FlappyBoxGame gameRef;
+  final FlappyBoxGame gameRef; // Keep reference to game instance
   final bool isTop;
   final double width;
 
